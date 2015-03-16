@@ -6,7 +6,7 @@
 # generated files
 bin/
 gen/
-#libs/
+jniLibs/
 obj/
 target/
 .gradle

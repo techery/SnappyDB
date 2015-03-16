@@ -4,7 +4,6 @@ buildscript {
         maven { url 'http://download.crashlytics.com/maven' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.13.+'
         classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
     }
 }
@@ -18,13 +17,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'crashlytics'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         applicationId "com.snappydb.snippets.app"
-        minSdkVersion 9
-        targetSdkVersion 19
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2
         versionName "1.1"
     }
@@ -36,7 +35,7 @@ android {
 
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -48,10 +47,14 @@ android {
     }
 }
 
+repositories {
+    jcenter()
+    maven { url 'http://download.crashlytics.com/maven' }
+}
+
 dependencies {
-    compile 'com.snappydb:snappydb-lib:0.4.0'
-    compile 'com.esotericsoftware.kryo:kryo:2.24.0'
-    compile 'com.android.support:appcompat-v7:20.0.0'
+    compile project(':library')
+    compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.crashlytics.android:crashlytics:1.+'
 }
 
@@ -71,9 +74,4 @@ if (propFile.exists()) {
     }
 } else {
     android.buildTypes.release.signingConfig = null
-}
-
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
 }
