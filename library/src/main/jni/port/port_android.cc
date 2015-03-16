@@ -20,7 +20,7 @@ int fflush_unlocked(FILE *f) {
 }
 
 int fdatasync(int fd) {
-  return fsync(fd);
+  return fdatasync(fd);
 }
 }
 

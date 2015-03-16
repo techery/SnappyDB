@@ -1,21 +1,14 @@
-
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'signing'
 
-group = 'com.snappydb'
-version = '0.5.0'
-ext.packaging = 'aar'
-def artifact_id = 'snappydb-lib'
-def sonatypeRepositoryUrl
-
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 19
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 4
         versionName version
     }
@@ -26,42 +19,41 @@ android {
     }
 
     sourceSets.main {
-        jniLibs.srcDir 'src/main/libs'
         jni.srcDirs = [] //disable automatic ndk-build call
     }
 
-    buildTypes.debug.jniDebugBuild !false
+    buildTypes.debug.jniDebuggable !false
 
     // call regular ndk-build script from app directory
     task ndkBuild(type: Exec) {
+        environment "NDK_LIBS_OUT", file("src/main/jniLibs").absolutePath
         commandLine "${getNdkPath()}/ndk-build", '-C', file('src/main/jni/').absolutePath
+        // put ANDROID_NDK_HOME to ~/.gradle/gradle.properties
     }
 
     tasks.withType(JavaCompile) {
         compileTask -> compileTask.dependsOn ndkBuild
     }
 
-    sourceSets {
-        main {
-            java {
-                srcDir 'src/main/java'
-            }
-        }
-    }
+}
+
+repositories {
+    jcenter()
 }
 
 dependencies {
-    compile 'com.esotericsoftware.kryo:kryo:2.24.0'
+    compile 'com.esotericsoftware:kryo:3.0.0'
     androidTestCompile('de.javakaffee:kryo-serializers:0.26') {
         transitive = false
         exclude group: 'com.esotericsoftware', module: 'kryo'
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
-}
-
+group = 'com.snappydb'
+version = '0.5.0'
+ext.packaging = 'aar'
+def artifact_id = 'snappydb-lib'
+def sonatypeRepositoryUrl
 
 if (isSnapshotBuild()) {
     sonatypeRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -69,7 +61,6 @@ if (isSnapshotBuild()) {
 } else {
     sonatypeRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 }
-
 
 signing {
     sign configurations.archives
@@ -98,7 +89,6 @@ artifacts {
     archives androidSourcesJar
     archives androidJavadocsJar
 }
-
 
 uploadArchives {
     repositories {
@@ -152,6 +142,6 @@ def isSnapshotBuild() {
     return version.contains("SNAPSHOT")
 }
 
-def getNdkPath () {
-    System.env.ANDROID_NDK_HOME?:"/Android/android-ndk-r9"
+def getNdkPath() {
+    System.env.ANDROID_NDK_HOME ?: ANDROID_NDK_HOME // see .gradle/gradle.properties
 }

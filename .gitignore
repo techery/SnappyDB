@@ -6,13 +6,15 @@
 # generated files
 bin/
 gen/
-#libs/
+jniLibs/
 obj/
 target/
 .gradle
 .idea/
 build/
 local.properties
+
+com_crashlytics_export_strings.xml
 
 # OS generated files #
 ######################
